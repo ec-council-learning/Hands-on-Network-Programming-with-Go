@@ -18,12 +18,15 @@ func main() {
 	flag.Parse()
 	// set hostKey
 	knownhosts := filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts")
-	client := devcon.NewClient(
-		os.Getenv("SSH_USER"),
+	client, err := devcon.NewClient(
+		"testkey",
 		*target,
-		devcon.SetPassword(os.Getenv("SSH_PASSWORD")),
+		devcon.SetKey(filepath.Join(os.Getenv("HOME"), "Desktop", "id_rsa")),
 		devcon.SetHostKeyCallback(knownhosts),
 	)
+	if err != nil {
+		log.Fatal(err)
+	}
 	f, err := os.Open(*cmdFile)
 	if err != nil {
 		log.Fatal(err)

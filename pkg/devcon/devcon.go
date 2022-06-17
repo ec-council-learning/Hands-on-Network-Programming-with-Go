@@ -3,6 +3,7 @@ package devcon
 import (
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,34 +17,87 @@ type sshClient struct {
 	cfg    *ssh.ClientConfig
 }
 
-type option func(*sshClient)
+type option func() (func(*sshClient), error)
 
-func SetPort(port string) option {
-	return func(c *sshClient) {
-		c.port = port
+func failedOption(err error) option {
+	return func() (func(*sshClient), error) {
+		return nil, err
 	}
 }
 
+func properOption(setter func(*sshClient)) option {
+	return func() (func(*sshClient), error) {
+		return setter, nil
+	}
+}
+
+func SetPort(port string) option {
+	return properOption(func(c *sshClient) {
+		c.port = port
+	})
+}
+
 func SetPassword(pw string) option {
-	return func(c *sshClient) {
+	return properOption(func(c *sshClient) {
 		authMethod := []ssh.AuthMethod{
 			ssh.Password(pw),
 		}
 		c.cfg.Auth = authMethod
-	}
+	})
 }
 
 func SetHostKeyCallback(knownhostsFile string) option {
-	return func(c *sshClient) {
-		hostKeyCallback, err := knownhosts.New(knownhostsFile)
-		if err != nil {
-			hostKeyCallback = ssh.InsecureIgnoreHostKey()
-		}
-		c.cfg.HostKeyCallback = hostKeyCallback
+	hostKeyCallback, err := knownhosts.New(knownhostsFile)
+	if err != nil {
+		failedOption(err)
 	}
+	return properOption(func(c *sshClient) {
+		c.cfg.HostKeyCallback = hostKeyCallback
+	})
 }
 
-func NewClient(user, target string, opts ...option) *sshClient {
+func SetKey(keyfile string) option {
+	f, err := os.Open(keyfile)
+	if err != nil {
+		failedOption(err)
+	}
+	defer f.Close()
+	bs, err := io.ReadAll(f)
+	if err != nil {
+		failedOption(err)
+	}
+	signer, err := ssh.ParsePrivateKey(bs)
+	if err != nil {
+		failedOption(err)
+	}
+	return properOption(func(c *sshClient) {
+		authMethod := []ssh.AuthMethod{
+			ssh.PublicKeys(signer),
+		}
+		c.cfg.Auth = authMethod
+	})
+}
+
+func (c *sshClient) setup(opts ...option) error {
+	if c == nil {
+		return nil
+	}
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		setter, err := opt()
+		if err != nil {
+			return err
+		}
+		if setter != nil {
+			setter(c)
+		}
+	}
+	return nil
+}
+
+func NewClient(user, target string, opts ...option) (*sshClient, error) {
 	defaultPort := "22"
 	client := &sshClient{
 		port:   defaultPort,
@@ -54,10 +108,10 @@ func NewClient(user, target string, opts ...option) *sshClient {
 			Timeout:         time.Second * 5,
 		},
 	}
-	for _, opt := range opts {
-		opt(client)
+	if err := client.setup(opts...); err != nil {
+		return client, err
 	}
-	return client
+	return client, nil
 }
 
 func (c *sshClient) Run(cmd string) (string, error) {
