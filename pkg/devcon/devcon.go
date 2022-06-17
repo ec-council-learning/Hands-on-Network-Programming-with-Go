@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/crypto/ssh/knownhosts"
 )
 
 type sshClient struct {
@@ -29,6 +30,16 @@ func SetPassword(pw string) option {
 			ssh.Password(pw),
 		}
 		c.cfg.Auth = authMethod
+	}
+}
+
+func SetHostKeyCallback(knownhostsFile string) option {
+	return func(c *sshClient) {
+		hostKeyCallback, err := knownhosts.New(knownhostsFile)
+		if err != nil {
+			hostKeyCallback = ssh.InsecureIgnoreHostKey()
+		}
+		c.cfg.HostKeyCallback = hostKeyCallback
 	}
 }
 
