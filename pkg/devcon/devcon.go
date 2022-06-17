@@ -3,7 +3,6 @@ package devcon
 import (
 	"fmt"
 	"io"
-	"os"
 	"time"
 
 	"github.com/pkg/errors"
@@ -12,21 +11,42 @@ import (
 
 type sshClient struct {
 	target string
+	port   string
 	cfg    *ssh.ClientConfig
 }
 
-func NewClient(target string) *sshClient {
-	return &sshClient{
+type option func(*sshClient)
+
+func SetPort(port string) option {
+	return func(c *sshClient) {
+		c.port = port
+	}
+}
+
+func SetPassword(pw string) option {
+	return func(c *sshClient) {
+		authMethod := []ssh.AuthMethod{
+			ssh.Password(pw),
+		}
+		c.cfg.Auth = authMethod
+	}
+}
+
+func NewClient(user, target string, opts ...option) *sshClient {
+	defaultPort := "22"
+	client := &sshClient{
+		port:   defaultPort,
 		target: target,
 		cfg: &ssh.ClientConfig{
-			User: os.Getenv("SSH_USER"),
-			Auth: []ssh.AuthMethod{
-				ssh.Password(os.Getenv("SSH_PASSWORD")),
-			},
+			User:            user,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 			Timeout:         time.Second * 5,
 		},
 	}
+	for _, opt := range opts {
+		opt(client)
+	}
+	return client
 }
 
 func (c *sshClient) Run(cmd string) (string, error) {

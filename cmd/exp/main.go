@@ -15,7 +15,11 @@ func main() {
 	target := flag.String("target", "127.0.0.1", "target against which to run a command")
 	cmdFile := flag.String("cmdfile", "", "command filename")
 	flag.Parse()
-	client := devcon.NewClient(*target)
+	client := devcon.NewClient(
+		os.Getenv("SSH_USER"),
+		*target,
+		devcon.SetPassword(os.Getenv("SSH_PASSWORD")),
+	)
 	f, err := os.Open(*cmdFile)
 	if err != nil {
 		log.Fatal(err)
