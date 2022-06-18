@@ -1,0 +1,12 @@
+<rpc-reply xmlns:junos="http://xml.juniper.net/junos/12.1X44/junos">
+    <isis-adjacency-information xmlns="http://xml.juniper.net/junos/12.1X44/junos-routing" junos:style="brief">
+        <isis-adjacency>
+            <interface-name>ge-0/0/1.0</interface-name>
+            <system-name>lab_srx100</system-name>
+            <level>2</level>
+            <adjacency-state>Up</adjacency-state>
+            <holdtime>21</holdtime>
+        </isis-adjacency>
+    </isis-adjacency-information>
+</rpc-reply>
+

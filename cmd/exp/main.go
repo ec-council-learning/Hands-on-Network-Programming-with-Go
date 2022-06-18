@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/xml"
 	"fmt"
 	"log"
 	"os"
@@ -22,14 +23,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	output, err := client.Run("show isis adjacency")
+	output, err := client.Run("show isis adjacency | display xml")
 	if err != nil {
 		log.Fatal(err)
 	}
-	isisAdj := parseRegex(output)
-	for k, v := range isisAdj {
-		fmt.Printf("%v: %v\n", k, v)
-	}
+	fmt.Println(output)
+	// isisAdj, err := parseXML(output)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(isisAdj.IsisAdjacencyInformation.IsisAdjacency.SystemName)
 }
 
 func parseLineSplit(in string) map[string]string {
@@ -62,4 +65,28 @@ func parseRegex(in string) map[string]string {
 		}
 	}
 	return isisAdj
+}
+
+type ISISAdjInfoRPCReply struct {
+	// XMLName                  xml.Name `xml:"ISISAdjInfoRPCReply"`
+	Junos                    string `xml:"junos,attr"`
+	IsisAdjacencyInformation struct {
+		Xmlns         string `xml:"xmlns,attr"`
+		Style         string `xml:"style,attr"`
+		IsisAdjacency struct {
+			InterfaceName  string `xml:"interface-name"`
+			SystemName     string `xml:"system-name"`
+			Level          string `xml:"level"`
+			AdjacencyState string `xml:"adjacency-state"`
+			Holdtime       string `xml:"holdtime"`
+		} `xml:"isis-adjacency"`
+	} `xml:"isis-adjacency-information"`
+}
+
+func parseXML(in string) (ISISAdjInfoRPCReply, error) {
+	var isisAdjInfo ISISAdjInfoRPCReply
+	if err := xml.Unmarshal([]byte(in), &isisAdjInfo); err != nil {
+		return isisAdjInfo, err
+	}
+	return isisAdjInfo, nil
 }
