@@ -31,6 +31,12 @@ func properOption(setter func(*sshClient)) option {
 	}
 }
 
+func SetTimeout(timeout time.Duration) option {
+	return properOption(func(c *sshClient) {
+		c.cfg.Timeout = timeout
+	})
+}
+
 func SetPort(port string) option {
 	return properOption(func(c *sshClient) {
 		c.port = port

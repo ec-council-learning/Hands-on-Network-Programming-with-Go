@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/devcon"
 )
@@ -21,6 +22,7 @@ func main() {
 	client, err := devcon.NewClient(
 		"testkey",
 		*target,
+		devcon.SetTimeout(time.Second*1),
 		devcon.SetKey(filepath.Join(os.Getenv("HOME"), "Desktop", "id_rsa")),
 		devcon.SetHostKeyCallback(knownhosts),
 	)
