@@ -1,4 +1,0 @@
-configure
-set system host-name lab_srx
-commit and-quit comment CHANGED_HOSTNAME_BACK
-exit
