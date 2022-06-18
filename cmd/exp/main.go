@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"encoding/xml"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -15,24 +16,28 @@ import (
 
 func main() {
 	client, err := devcon.NewClient(
-		os.Getenv("SSH_USER"),
-		"labsrx",
-		devcon.SetPassword(os.Getenv("SSH_PASSWORD")),
+		"ec2-user",
+		"3.141.97.255",
+		devcon.SetKey(filepath.Join(os.Getenv("CODERED"), "aws-jnpr-lab.pem")),
 		devcon.SetTimeout(time.Second*5),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	output, err := client.Run("show isis adjacency | display xml")
+	output, err := client.Run("show interfaces terse | display json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(output)
-	// isisAdj, err := parseXML(output)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println(isisAdj.IsisAdjacencyInformation.IsisAdjacency.SystemName)
+	// fmt.Println(output)
+	intTerse, err := parseJSON(output)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, phy := range intTerse.InterfaceInformation {
+		for _, intf := range phy.PhysicalInterface {
+			fmt.Println(intf.Name[0].Data, intf.AdminStatus[0].Data, intf.OperStatus[0].Data)
+		}
+	}
 }
 
 func parseLineSplit(in string) map[string]string {
@@ -83,10 +88,48 @@ type ISISAdjInfoRPCReply struct {
 	} `xml:"isis-adjacency-information"`
 }
 
-func parseXML(in string) (ISISAdjInfoRPCReply, error) {
-	var isisAdjInfo ISISAdjInfoRPCReply
-	if err := xml.Unmarshal([]byte(in), &isisAdjInfo); err != nil {
-		return isisAdjInfo, err
+type InterfaceTerse struct {
+	InterfaceInformation []struct {
+		Attributes struct {
+			Xmlns      string `json:"xmlns"`
+			JunosStyle string `json:"junos:style"`
+		} `json:"attributes"`
+		PhysicalInterface []struct {
+			Name []struct {
+				Data string `json:"data"`
+			} `json:"name"`
+			AdminStatus []struct {
+				Data string `json:"data"`
+			} `json:"admin-status"`
+			OperStatus []struct {
+				Data string `json:"data"`
+			} `json:"oper-status"`
+			LogicalInterface []struct {
+				Name []struct {
+					Data string `json:"data"`
+				} `json:"name"`
+				AdminStatus []struct {
+					Data string `json:"data"`
+				} `json:"admin-status"`
+				OperStatus []struct {
+					Data string `json:"data"`
+				} `json:"oper-status"`
+				FilterInformation []struct {
+				} `json:"filter-information"`
+				AddressFamily []struct {
+					AddressFamilyName []struct {
+						Data string `json:"data"`
+					} `json:"address-family-name"`
+				} `json:"address-family"`
+			} `json:"logical-interface,omitempty"`
+		} `json:"physical-interface"`
+	} `json:"interface-information"`
+}
+
+func parseJSON(in string) (InterfaceTerse, error) {
+	var interfaceTerse InterfaceTerse
+	if err := json.Unmarshal([]byte(in), &interfaceTerse); err != nil {
+		return interfaceTerse, err
 	}
-	return isisAdjInfo, nil
+	return interfaceTerse, nil
 }

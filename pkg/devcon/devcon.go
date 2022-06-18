@@ -55,7 +55,7 @@ func SetPassword(pw string) option {
 func SetHostKeyCallback(knownhostsFile string) option {
 	hostKeyCallback, err := knownhosts.New(knownhostsFile)
 	if err != nil {
-		failedOption(err)
+		return failedOption(err)
 	}
 	return properOption(func(c *sshClient) {
 		c.cfg.HostKeyCallback = hostKeyCallback
@@ -65,16 +65,16 @@ func SetHostKeyCallback(knownhostsFile string) option {
 func SetKey(keyfile string) option {
 	f, err := os.Open(keyfile)
 	if err != nil {
-		failedOption(err)
+		return failedOption(err)
 	}
 	defer f.Close()
 	bs, err := io.ReadAll(f)
 	if err != nil {
-		failedOption(err)
+		return failedOption(err)
 	}
 	signer, err := ssh.ParsePrivateKey(bs)
 	if err != nil {
-		failedOption(err)
+		return failedOption(err)
 	}
 	return properOption(func(c *sshClient) {
 		authMethod := []ssh.AuthMethod{
