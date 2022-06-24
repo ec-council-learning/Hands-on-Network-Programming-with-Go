@@ -7,19 +7,10 @@ import (
 )
 
 func main() {
-	// isisAdj := cmdrunner.ISISAdjacencyRpcReply{Target: "labsrx", ExpectedNeighbor: "lab_srx10"}
-	// if err := isisAdj.Run(); err != nil {
-	// 	log.Fatal(err)
-	// }
-	// err := isisAdj.Compare()
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	sr := cmdrunner.SpecificRouteRpcReply{Target: "labsrx", ExpectedNextHop: "192.168.0.1"}
-	if err := sr.Run(); err != nil {
-		log.Fatal(err)
-	}
-	if err := sr.Compare(); err != nil {
+	isisAdj := &cmdrunner.ISISAdjacencyRpcReply{Target: "labsrx", ExpectedNeighbor: "lab_srx100"}
+	sr := &cmdrunner.SpecificRouteRpcReply{Target: "labsrx", ExpectedNextHop: "192.168.0.1"}
+	cmds := []cmdrunner.Runner{isisAdj, sr}
+	if err := cmdrunner.Stepper(cmds); err != nil {
 		log.Println(err)
 	}
 }

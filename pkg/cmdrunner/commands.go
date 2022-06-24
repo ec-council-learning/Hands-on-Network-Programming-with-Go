@@ -57,9 +57,7 @@ type ISISAdjacencyRpcReply struct {
 	} `xml:"isis-adjacency-information"`
 }
 
-func (ia *ISISAdjacencyRpcReply) unmarshal(bs []byte) error {
-	return xml.Unmarshal(bs, &ia)
-}
+func (ia *ISISAdjacencyRpcReply) String() string { return "ISISAdjacencyRpcReply" }
 
 func (ia *ISISAdjacencyRpcReply) Run() error {
 	cmd := "show isis adjacency | display xml"
@@ -123,6 +121,8 @@ type SpecificRouteRpcReply struct {
 		} `xml:"route-table"`
 	} `xml:"route-information"`
 }
+
+func (sr *SpecificRouteRpcReply) String() string { return "SpecificRouteRpcReply" }
 
 func (sr *SpecificRouteRpcReply) Run() error {
 	cmd := fmt.Sprintf("show route %s | display xml", sr.Prefix)
