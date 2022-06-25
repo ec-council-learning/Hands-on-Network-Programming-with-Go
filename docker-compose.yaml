@@ -1,0 +1,16 @@
+version: '3'
+services:
+  postgresql:
+    image: postgres
+    container_name: pg_device_inventory
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pg_device_inventory:/var/lib/postgresql/data
+      - ${PWD}/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+volumes:
+  pg_device_inventory:
+    external: true
