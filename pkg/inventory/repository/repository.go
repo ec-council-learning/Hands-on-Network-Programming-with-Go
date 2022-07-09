@@ -19,3 +19,12 @@ type Model interface {
 	Update(vendor models.Model) error
 	Delete(id int) error
 }
+
+type Device interface {
+	New(device models.Device) error
+	// GetByID(id int) (models.Device, error)
+	// GetByHostame(hostname string) (models.Device, error)
+	// GetAll() ([]models.Device, error)
+	// Update(device models.Device) error
+	// Delete(id int) error
+}

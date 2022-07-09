@@ -10,3 +10,10 @@ type Model struct {
 	Name   string
 	Vendor Vendor
 }
+
+type Device struct {
+	ID       int
+	Hostname string
+	IPv4     string
+	Model    Model
+}

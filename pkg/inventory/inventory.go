@@ -10,6 +10,7 @@ type Service struct {
 	DBPool     *pgxpool.Pool
 	VendorRepo repository.Vendor
 	ModelRepo  repository.Model
+	DeviceRepo repository.Device
 }
 
 func NewService(dbpool *pgxpool.Pool) *Service {
@@ -17,5 +18,6 @@ func NewService(dbpool *pgxpool.Pool) *Service {
 		DBPool:     dbpool,
 		VendorRepo: &db.PGVendor{DBPool: dbpool},
 		ModelRepo:  &db.PGModel{DBPool: dbpool},
+		DeviceRepo: &db.PGDevice{DBPool: dbpool},
 	}
 }
