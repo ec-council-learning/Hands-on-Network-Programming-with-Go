@@ -9,11 +9,13 @@ import (
 type Service struct {
 	DBPool     *pgxpool.Pool
 	VendorRepo repository.Vendor
+	ModelRepo  repository.Model
 }
 
 func NewService(dbpool *pgxpool.Pool) *Service {
 	return &Service{
 		DBPool:     dbpool,
 		VendorRepo: &db.PGVendor{DBPool: dbpool},
+		ModelRepo:  &db.PGModel{DBPool: dbpool},
 	}
 }

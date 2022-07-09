@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/inventory"
+	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/models"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -24,39 +25,49 @@ func main() {
 	}
 	fmt.Println("db connected successfully")
 	inventoryService := inventory.NewService(dbpool)
-	// if err := inventoryService.VendorRepo.New("fortigate"); err != nil {
-	// 	log.Println(err)
-	// }
-	// fmt.Println("successfully created a new vendor")
-	// vendor, err := inventoryService.VendorRepo.GetByID(7)
-	// if err != nil {
-	// 	log.Println(err)
-	// }
-	// fmt.Println(vendor.Name)
-	vendor, err := inventoryService.VendorRepo.GetByName("fortigate")
+	testModel := models.Model{
+		Name:   "test-model",
+		Vendor: models.Vendor{ID: 1},
+	}
+	if err := inventoryService.ModelRepo.New(testModel); err != nil {
+		log.Println(err)
+	}
+	fmt.Println("successfully created a new model")
+	fmt.Println("getting model by ID")
+	model, err := inventoryService.ModelRepo.GetByID(3)
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(vendor.ID)
-	vendor.Name = "updated fortigate"
-	if err := inventoryService.VendorRepo.Update(vendor); err != nil {
-		log.Println(err)
-	}
-	vendors, err := inventoryService.VendorRepo.GetAll()
+	fmt.Println(model)
+	fmt.Println("getting model by Name")
+	model, err = inventoryService.ModelRepo.GetByName("test-model")
 	if err != nil {
 		log.Println(err)
 	}
-	for _, v := range vendors {
-		fmt.Println(v.ID, v.Name)
-	}
-	if err := inventoryService.VendorRepo.Delete(vendor.ID); err != nil {
+	fmt.Println(model.ID)
+	model.Name = "updated-test-model"
+	fmt.Println("updating model name")
+	if err := inventoryService.ModelRepo.Update(model); err != nil {
 		log.Println(err)
 	}
-	vendors, err = inventoryService.VendorRepo.GetAll()
+	fmt.Println("getting all models")
+	models, err := inventoryService.ModelRepo.GetAll()
 	if err != nil {
 		log.Println(err)
 	}
-	for _, v := range vendors {
-		fmt.Println(v.ID, v.Name)
+	for _, m := range models {
+		fmt.Println(m.ID, m.Name, m.Vendor.ID, m.Vendor.Name)
+	}
+	fmt.Println("delting test model")
+	if err := inventoryService.ModelRepo.Delete(model.ID); err != nil {
+		log.Println(err)
+	}
+	fmt.Println("getting all models")
+	models, err = inventoryService.ModelRepo.GetAll()
+	if err != nil {
+		log.Println(err)
+	}
+	for _, m := range models {
+		fmt.Println(m.ID, m.Name, m.Vendor.ID, m.Vendor.Name)
 	}
 }

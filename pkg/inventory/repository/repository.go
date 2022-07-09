@@ -10,3 +10,12 @@ type Vendor interface {
 	Update(vendor models.Vendor) error
 	Delete(id int) error
 }
+
+type Model interface {
+	New(model models.Model) error
+	GetByID(id int) (models.Model, error)
+	GetByName(name string) (models.Model, error)
+	GetAll() ([]models.Model, error)
+	Update(vendor models.Model) error
+	Delete(id int) error
+}
