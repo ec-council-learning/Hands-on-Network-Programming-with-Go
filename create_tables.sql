@@ -32,6 +32,7 @@ VALUES ('labsrx', '10.0.0.60', 1);
 
 -- join
 SELECT
+    id,
     hostname,
     ipv4,
     vendors.name AS vendor,

@@ -22,9 +22,9 @@ type Model interface {
 
 type Device interface {
 	New(device models.Device) error
-	// GetByID(id int) (models.Device, error)
-	// GetByHostame(hostname string) (models.Device, error)
-	// GetAll() ([]models.Device, error)
+	GetByID(id int) (models.Device, error)
+	GetByHostname(hostname string) (models.Device, error)
+	GetAll() ([]models.Device, error)
 	// Update(device models.Device) error
 	// Delete(id int) error
 }
