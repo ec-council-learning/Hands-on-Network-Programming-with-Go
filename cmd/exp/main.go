@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/inventory"
+	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/models"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -24,21 +25,13 @@ func main() {
 	}
 	fmt.Println("db connected successfully")
 	inventoryService := inventory.NewService(dbpool)
-	dev, err := inventoryService.DeviceRepo.GetByHostname("labsrx")
-	if err != nil {
-		log.Println(err)
+	updatedDevice := models.Device{
+		ID:       2,
+		Hostname: "updated-testhostname",
+		IPv4:     "42.42.42.42",
+		Model:    models.Model{ID: 1},
 	}
-	fmt.Println(dev.ID, dev.Hostname, dev.Model.Vendor.Name, dev.Model.Name)
-	dev, err = inventoryService.DeviceRepo.GetByID(dev.ID)
-	if err != nil {
+	if err := inventoryService.DeviceRepo.Update(updatedDevice); err != nil {
 		log.Println(err)
-	}
-	fmt.Println(dev.Hostname)
-	devices, err := inventoryService.DeviceRepo.GetAll()
-	if err != nil {
-		log.Println(err)
-	}
-	for _, d := range devices {
-		fmt.Println(d.Hostname)
 	}
 }

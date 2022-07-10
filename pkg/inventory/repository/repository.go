@@ -25,6 +25,6 @@ type Device interface {
 	GetByID(id int) (models.Device, error)
 	GetByHostname(hostname string) (models.Device, error)
 	GetAll() ([]models.Device, error)
-	// Update(device models.Device) error
+	Update(device models.Device) error
 	// Delete(id int) error
 }

@@ -50,6 +50,10 @@ const (
 		ON devices.model_id = models.id
 	JOIN vendors
 		ON models.vendor_id = vendors.id`
+	updateDeviceSQL = `
+	UPDATE devices
+	SET hostname = $1, ipv4 = $2, model_id = $3
+	WHERE id = $4`
 )
 
 type PGDevice struct {
@@ -130,4 +134,14 @@ func (pg *PGDevice) GetAll() ([]models.Device, error) {
 		return devices, errors.Wrap(err, "GetByName rows failed")
 	}
 	return devices, nil
+}
+
+func (pg *PGDevice) Update(device models.Device) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	_, err := pg.DBPool.Exec(ctx, updateDeviceSQL, device.Hostname, device.IPv4, device.Model.ID, device.ID)
+	if err != nil {
+		return errors.Wrap(err, "device update failed")
+	}
+	return nil
 }
