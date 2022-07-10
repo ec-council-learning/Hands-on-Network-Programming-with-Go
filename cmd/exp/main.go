@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/inventory"
-	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/models"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
@@ -25,13 +24,8 @@ func main() {
 	}
 	fmt.Println("db connected successfully")
 	inventoryService := inventory.NewService(dbpool)
-	updatedDevice := models.Device{
-		ID:       2,
-		Hostname: "updated-testhostname",
-		IPv4:     "42.42.42.42",
-		Model:    models.Model{ID: 1},
-	}
-	if err := inventoryService.DeviceRepo.Update(updatedDevice); err != nil {
+	if err := inventoryService.DeviceRepo.Delete(2); err != nil {
 		log.Println(err)
 	}
+	fmt.Println("successfully removed test host")
 }

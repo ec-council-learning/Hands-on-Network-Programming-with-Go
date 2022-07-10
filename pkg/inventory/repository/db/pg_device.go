@@ -54,6 +54,7 @@ const (
 	UPDATE devices
 	SET hostname = $1, ipv4 = $2, model_id = $3
 	WHERE id = $4`
+	deleteDeviceSQL = `DELETE FROM devices WHERE id = $1`
 )
 
 type PGDevice struct {
@@ -142,6 +143,16 @@ func (pg *PGDevice) Update(device models.Device) error {
 	_, err := pg.DBPool.Exec(ctx, updateDeviceSQL, device.Hostname, device.IPv4, device.Model.ID, device.ID)
 	if err != nil {
 		return errors.Wrap(err, "device update failed")
+	}
+	return nil
+}
+
+func (pg *PGDevice) Delete(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	_, err := pg.DBPool.Exec(ctx, deleteDeviceSQL, id)
+	if err != nil {
+		return errors.Wrap(err, "device delete failed")
 	}
 	return nil
 }
