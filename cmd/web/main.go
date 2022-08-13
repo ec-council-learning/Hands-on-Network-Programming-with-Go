@@ -48,16 +48,41 @@ func main() {
 	}
 	http.HandleFunc("/", app.handleHome)
 	http.HandleFunc("/vendors", app.handleVendors)
+	http.HandleFunc("/models", app.handleModels)
+	http.HandleFunc("/devices", app.handleDevices)
 	log.Println("starting web server on", *websocket)
 	http.ListenAndServe(*websocket, nil)
 }
 
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
-	app.render(w, "home.page.tmpl")
+	app.render(w, "home.page.tmpl", nil)
 }
 
 func (app *application) handleVendors(w http.ResponseWriter, r *http.Request) {
-	app.render(w, "vendors.page.tmpl")
+	vendors, err := app.inventoryService.VendorRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	app.render(w, "vendors.page.tmpl", vendors)
+}
+
+func (app *application) handleModels(w http.ResponseWriter, r *http.Request) {
+	models, err := app.inventoryService.ModelRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	app.render(w, "models.page.tmpl", models)
+}
+
+func (app *application) handleDevices(w http.ResponseWriter, r *http.Request) {
+	devices, err := app.inventoryService.DeviceRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	app.render(w, "devices.page.tmpl", devices)
 }
 
 var functions = template.FuncMap{}
@@ -83,13 +108,13 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	return cache, nil
 }
 
-func (app *application) render(w http.ResponseWriter, name string) {
+func (app *application) render(w http.ResponseWriter, name string, data interface{}) {
 	ts, ok := app.templateCache[name]
 	if !ok {
 		http.Error(w, fmt.Errorf("The template %s does not exist", name).Error(), http.StatusInternalServerError)
 		return
 	}
-	if err := ts.Execute(w, nil); err != nil {
+	if err := ts.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
