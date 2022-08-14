@@ -1,0 +1,26 @@
+{{template "base" .}}
+{{define "title"}}new model{{end}}
+{{define "main"}}
+<div class="container py-4">
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Models</h1>
+            <p class="col-md-8 fs-4">Using a series of utilities, you can create this jumbotron, just like the one in previous versions of Bootstrap. Check out the examples below for how you can remix and restyle it to your liking.</p>
+            <button class="btn btn-primary btn-lg" type="button">Docs</button>
+        </div>
+    </div>
+    <form class="text-center border border-light p-5" action="/models/add" method="POST">
+        <select class="form-select" name="vendor_id">
+            <option selected>Select Vendor</option>
+            {{range .}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+        </select>
+        <div class="mb-3">
+            <label for="model" class="form-label">Model</label>
+            <input type="text" name="model" class="form-control" id="model">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{{end}}
