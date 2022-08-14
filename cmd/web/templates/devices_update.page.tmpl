@@ -30,6 +30,7 @@
             <input type="text" name="ip" class="form-control" id="ip" value="{{.Device.IPv4}}">
         </div>
         <button type="submit" class="btn btn-primary">Update</button>
+        <a class="btn btn-danger btn-block" href="/devices/delete/{{.Device.ID}}">Delete</a>
     </form>
 </div>
 {{end}}
