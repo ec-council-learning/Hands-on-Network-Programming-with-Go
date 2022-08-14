@@ -1,5 +1,5 @@
 {{template "base" .}}
-{{define "title"}}vendors{{end}}
+{{define "title"}}update vendor{{end}}
 {{define "main"}}
 <div class="container py-4">
     <div class="p-5 mb-4 bg-light rounded-3">
@@ -9,21 +9,13 @@
             <button class="btn btn-primary btn-lg" type="button">Docs</button>
         </div>
     </div>
-    <table class="table table-dark table-striped">
-    <thead>
-        <tr>
-        <th scope="col">ID</th>
-        <th scope="col">Vendor</th>
-        </tr>
-    </thead>
-    <tbody>
-        {{range .}}
-        <tr>
-        <td scope="row"><a href="/vendors/{{.ID}}">{{.ID}}</a></td>
-        <td scope="row">{{.Name}}</td>
-        </tr>
-        {{end}}
-    </tbody>
-    </table>
+    <form class="text-center border border-light p-5" action="/vendors/{{.ID}}" method="POST">
+        <input type="hidden" name="vendor_id" class="form-control" value="{{.ID}}">
+        <div class="mb-3">
+            <label for="vendor" class="form-label">Vendor</label>
+            <input type="text" name="vendor" class="form-control" id="vendor" value="{{.Name}}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
 </div>
 {{end}}
