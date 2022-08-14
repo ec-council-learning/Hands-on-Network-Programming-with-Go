@@ -1,0 +1,35 @@
+{{template "base" .}}
+{{define "title"}}update device{{end}}
+{{define "main"}}
+<div class="container py-4">
+    <div class="p-5 mb-4 bg-light rounded-3">
+        <div class="container-fluid py-5">
+            <h1 class="display-5 fw-bold">Devices</h1>
+            <p class="col-md-8 fs-4">Using a series of utilities, you can create this jumbotron, just like the one in previous versions of Bootstrap. Check out the examples below for how you can remix and restyle it to your liking.</p>
+            <button class="btn btn-primary btn-lg" type="button">Docs</button>
+        </div>
+    </div>
+    <form class="text-center border border-light p-5" action="/devices/{{.Device.ID}}" method="POST">
+        <select class="form-select" name="model_id">
+            <option selected>Select Vendor</option>
+            {{$device := .Device}}
+            {{range .Models}}
+                {{if eq .ID $device.Model.ID}}
+            <option selected value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+        </select>
+        <input type="hidden" name="device_id" class="form-control" value="{{.Device.ID}}">
+        <div class="mb-3">
+            <label for="hostname" class="form-label">Hostname</label>
+            <input type="text" name="hostname" class="form-control" id="hostname" value="{{.Device.Hostname}}">
+        </div>
+        <div class="mb-3">
+            <label for="ip" class="form-label">IP</label>
+            <input type="text" name="ip" class="form-control" id="ip" value="{{.Device.IPv4}}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+{{end}}

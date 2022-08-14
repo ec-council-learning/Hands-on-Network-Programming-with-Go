@@ -19,8 +19,10 @@ func (app *application) routes() http.Handler {
 	router.HandleFunc("/models/{id:[0-9]+}", app.handleModelUpdate).Methods(http.MethodPost)
 	router.HandleFunc("/models/new", app.handleModelsNew).Methods(http.MethodGet)
 	router.HandleFunc("/models/add", app.handleModelsAdd).Methods(http.MethodPost)
+	router.HandleFunc("/devices", app.handleDevices).Methods(http.MethodGet)
+	router.HandleFunc("/devices/{id:[0-9]+}", app.handleDevice).Methods(http.MethodGet)
+	router.HandleFunc("/devices/{id:[0-9]+}", app.handleDeviceUpdate).Methods(http.MethodPost)
 	router.HandleFunc("/devices/new", app.handleDeviceNew).Methods(http.MethodGet)
 	router.HandleFunc("/devices/add", app.handleDeviceAdd).Methods(http.MethodPost)
-	router.HandleFunc("/devices", app.handleDevices).Methods(http.MethodGet)
 	return router
 }

@@ -21,7 +21,7 @@
     <tbody>
         {{range .}}
         <tr>
-        <th scope="row">{{.ID}}</th>
+        <th scope="row"><a href="/devices/{{.ID}}">{{.ID}}</a></th>
         <th scope="row">{{.Hostname}}</th>
         <th scope="row">{{.IPv4}}</th>
         <th scope="row">{{.Model.Name}}</th>

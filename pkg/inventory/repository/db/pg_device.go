@@ -18,6 +18,7 @@ const (
 		hostname,
 		ipv4,
 		vendors.name AS vendor,
+		models.id,
 		models.name AS model
 	FROM devices
 	JOIN models
@@ -81,6 +82,7 @@ func (pg *PGDevice) GetByID(id int) (models.Device, error) {
 		&device.Hostname,
 		&ip,
 		&device.Model.Vendor.Name,
+		&device.Model.ID,
 		&device.Model.Name,
 	); err != nil {
 		return device, errors.Wrap(err, "GetByID Scan failed")

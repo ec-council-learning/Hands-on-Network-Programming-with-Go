@@ -257,3 +257,67 @@ func (app *application) handleModelUpdate(w http.ResponseWriter, r *http.Request
 	}
 	app.render(w, "models.page.tmpl", models)
 }
+
+func (app *application) handleDevice(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	device, err := app.inventoryService.DeviceRepo.GetByID(id)
+	if err != nil {
+		http.Error(w, errors.New("device is not in DB").Error(), http.StatusBadRequest)
+		return
+	}
+	devModels, err := app.inventoryService.ModelRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	composite := struct {
+		Models []models.Model
+		Device models.Device
+	}{
+		Models: devModels,
+		Device: device,
+	}
+	app.render(w, "devices_update.page.tmpl", composite)
+}
+
+func (app *application) handleDeviceUpdate(w http.ResponseWriter, r *http.Request) {
+	log.Println("hit device update handler")
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, errors.New("couldn't parse form").Error(), http.StatusBadRequest)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	modelID, err := strconv.Atoi(r.FormValue("model_id"))
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	device := models.Device{
+		ID:       id,
+		Hostname: r.FormValue("hostname"),
+		IPv4:     r.FormValue("ip"),
+		Model:    models.Model{ID: modelID},
+	}
+	if err := app.inventoryService.DeviceRepo.Update(device); err != nil {
+		http.Error(w, errors.New("couldn't update vendor in the DB").Error(), http.StatusBadRequest)
+		return
+	}
+	devices, err := app.inventoryService.DeviceRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	app.render(w, "devices.page.tmpl", devices)
+}
