@@ -194,3 +194,66 @@ func (app *application) handleDevices(w http.ResponseWriter, r *http.Request) {
 	}
 	app.render(w, "devices.page.tmpl", devices)
 }
+
+func (app *application) handleModel(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	model, err := app.inventoryService.ModelRepo.GetByID(id)
+	if err != nil {
+		http.Error(w, errors.New("vendor is not in DB").Error(), http.StatusBadRequest)
+		return
+	}
+	vendors, err := app.inventoryService.VendorRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	composite := struct {
+		Vendors []models.Vendor
+		Model   models.Model
+	}{
+		Vendors: vendors,
+		Model:   model,
+	}
+	app.render(w, "models_update.page.tmpl", composite)
+}
+
+func (app *application) handleModelUpdate(w http.ResponseWriter, r *http.Request) {
+	log.Println("hit vendor update handler")
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, errors.New("couldn't parse form").Error(), http.StatusBadRequest)
+		return
+	}
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	vendorID, err := strconv.Atoi(r.FormValue("vendor_id"))
+	if err != nil {
+		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		return
+	}
+	model := models.Model{
+		ID:     id,
+		Name:   r.FormValue("model"),
+		Vendor: models.Vendor{ID: vendorID},
+	}
+	if err := app.inventoryService.ModelRepo.Update(model); err != nil {
+		http.Error(w, errors.New("couldn't update vendor in the DB").Error(), http.StatusBadRequest)
+		return
+	}
+	models, err := app.inventoryService.ModelRepo.GetAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	app.render(w, "models.page.tmpl", models)
+}
