@@ -279,7 +279,7 @@ func (app *application) handleDeviceAdd(w http.ResponseWriter, r *http.Request) 
 	idStr := r.FormValue("model_id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, errors.New("id is not an int").Error(), http.StatusBadRequest)
+		http.Error(w, errors.New("model id is not an int").Error(), http.StatusBadRequest)
 		return
 	}
 	newDevice := models.Device{
