@@ -11,38 +11,48 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
+// sshClient contains enough information about a device
+// to remote access the device using the ssh protocol.
 type sshClient struct {
 	target string
 	port   string
 	cfg    *ssh.ClientConfig
 }
 
+// option is a functional paradigm to apply options
+// to a factory function.
 type option func() (func(*sshClient), error)
 
+// failedOption deals with option error cases.
 func failedOption(err error) option {
 	return func() (func(*sshClient), error) {
 		return nil, err
 	}
 }
 
+// properOption is the success case for an option.
 func properOption(setter func(*sshClient)) option {
 	return func() (func(*sshClient), error) {
 		return setter, nil
 	}
 }
 
+// SetTimeout applies a timeout in seconds for the client connection.
 func SetTimeout(timeout time.Duration) option {
 	return properOption(func(c *sshClient) {
 		c.cfg.Timeout = timeout
 	})
 }
 
+// SetPort applies a port to the client. If not set, the default port
+// of 22 is applied.
 func SetPort(port string) option {
 	return properOption(func(c *sshClient) {
 		c.port = port
 	})
 }
 
+// SetPassword applies a password to the client.
 func SetPassword(pw string) option {
 	return properOption(func(c *sshClient) {
 		authMethod := []ssh.AuthMethod{
@@ -52,6 +62,9 @@ func SetPassword(pw string) option {
 	})
 }
 
+// SetHostKeyCallback takes in a known hosts file, usually an absolute path,
+// and applies it to the client as an option to protect against
+// man-in-the-middle attacks.
 func SetHostKeyCallback(knownhostsFile string) option {
 	hostKeyCallback, err := knownhosts.New(knownhostsFile)
 	if err != nil {
@@ -62,6 +75,8 @@ func SetHostKeyCallback(knownhostsFile string) option {
 	})
 }
 
+// SetKey takes in private key file, usually an absolute path,
+// and applies it to the client as an option.
 func SetKey(keyfile string) option {
 	f, err := os.Open(keyfile)
 	if err != nil {
@@ -84,6 +99,8 @@ func SetKey(keyfile string) option {
 	})
 }
 
+// setup runs through any supplied options checking for
+// any errors, returning nil if there are none.
 func (c *sshClient) setup(opts ...option) error {
 	if c == nil {
 		return nil
@@ -103,6 +120,8 @@ func (c *sshClient) setup(opts ...option) error {
 	return nil
 }
 
+// NewClient is a factory function that takes in a a username, a target
+// in the form of an IP or a hostname, and potentially options.
 func NewClient(user, target string, opts ...option) (*sshClient, error) {
 	defaultPort := "22"
 	client := &sshClient{
@@ -120,6 +139,8 @@ func NewClient(user, target string, opts ...option) (*sshClient, error) {
 	return client, nil
 }
 
+// Run takes in a command, opens a remote connection to a target
+// device, and runs in against the device.
 func (c *sshClient) Run(cmd string) (string, error) {
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:22", c.target), c.cfg)
 	if err != nil {
@@ -138,6 +159,9 @@ func (c *sshClient) Run(cmd string) (string, error) {
 	return string(output), nil
 }
 
+// RunAll takes in a slice of strings, normally a configuration, establishes
+// an interactive session with the target, running in each command
+// line by line.
 func (c *sshClient) RunAll(cmds []string) (string, error) {
 	client, err := ssh.Dial("tcp", fmt.Sprintf("%v:22", c.target), c.cfg)
 	if err != nil {
