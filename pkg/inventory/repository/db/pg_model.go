@@ -9,30 +9,64 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	newModelSQL     = `INSERT INTO models (name, vendor_id) VALUES ($1, $2)`
-	getModelByIDSQL = `
-		SELECT models.id, models.name, vendors.id, vendors.name
-		FROM models
-		JOIN vendors ON vendors.id = models.vendor_id
-		WHERE models.id = $1`
-	getModelByNameSQL = `
-		SELECT models.id, models.name, vendors.id, vendors.name
-		FROM models
-		JOIN vendors ON vendors.id = models.vendor_id
-		WHERE models.name = $1`
-	getModelsSQL = `
-		SELECT models.id, models.name, vendors.id, vendors.name
-		FROM models
-		JOIN vendors ON vendors.id = models.vendor_id`
-	updateModelSQL = `UPDATE models set name = $1, vendor_id = $2 WHERE id = $3`
-	deleteModelSQL = `DELETE FROM models WHERE id = $1`
-)
+const newModelSQL = `-- name: newModel: one
+INSERT INTO models (
+	name,
+	vendor_id
+) VALUES (
+	$1,
+	$2
+)`
 
+const getModelByIDSQL = `-- name: getModelByID: one
+SELECT
+	models.id,
+	models.name,
+	vendors.id,
+	vendors.name
+FROM models
+JOIN vendors
+	ON vendors.id = models.vendor_id
+WHERE models.id = $1`
+
+const getModelByNameSQL = `-- name: getModelByName: one
+SELECT
+	models.id,
+	models.name,
+	vendors.id,
+	vendors.name
+FROM models
+JOIN vendors
+	ON vendors.id = models.vendor_id
+WHERE models.name = $1`
+
+const getModelsSQL = `-- name: getModels: many
+SELECT
+	models.id,
+	models.name,
+	vendors.id,
+	vendors.name
+FROM models
+JOIN vendors
+	ON vendors.id = models.vendor_id`
+
+const updateModelSQL = `-- name: updateModel: one
+UPDATE models
+set
+	name = $1,
+	vendor_id = $2
+WHERE id = $3`
+
+const deleteModelSQL = `-- name: deleteModel: one
+DELETE FROM models
+WHERE id = $1`
+
+// PGModel holds the DB connection pool.
 type PGModel struct {
 	DBPool *pgxpool.Pool
 }
 
+// New adds a model to the table.
 func (pg *PGModel) New(model models.Model) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -43,6 +77,7 @@ func (pg *PGModel) New(model models.Model) error {
 	return nil
 }
 
+// GetByID returns a specific model matching the provided PK.
 func (pg *PGModel) GetByID(id int) (models.Model, error) {
 	var model models.Model
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -58,6 +93,7 @@ func (pg *PGModel) GetByID(id int) (models.Model, error) {
 	return model, nil
 }
 
+// GetByName returns a specific model matching the provided name.
 func (pg *PGModel) GetByName(name string) (models.Model, error) {
 	var model models.Model
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -73,6 +109,7 @@ func (pg *PGModel) GetByName(name string) (models.Model, error) {
 	return model, nil
 }
 
+// GetAll returns all models in the table.
 func (pg *PGModel) GetAll() ([]models.Model, error) {
 	var mods []models.Model
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -100,6 +137,7 @@ func (pg *PGModel) GetAll() ([]models.Model, error) {
 	return mods, nil
 }
 
+// Update modifies an existing model.
 func (pg *PGModel) Update(model models.Model) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -110,6 +148,7 @@ func (pg *PGModel) Update(model models.Model) error {
 	return nil
 }
 
+// Delete removes a model by it's PK.
 func (pg *PGModel) Delete(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
