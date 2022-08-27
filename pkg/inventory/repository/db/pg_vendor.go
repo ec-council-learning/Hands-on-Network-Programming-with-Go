@@ -9,19 +9,48 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	newVendorSQL       = `INSERT INTO vendors (name) VALUES ($1)`
-	getVendorByIDSQL   = `SELECT id, name FROM vendors WHERE id = $1`
-	getVendorByNameSQL = `SELECT id, name FROM vendors WHERE name = $1`
-	getVendorsSQL      = `SELECT id, name FROM vendors`
-	updateVendorSQL    = `UPDATE vendors set name = $1 WHERE id = $2`
-	deleteVendorSQL    = `DELETE FROM vendors WHERE id = $1`
-)
+const newVendorSQL = `-- name: newVendor: one
+INSERT INTO vendors (
+	name
+) VALUES (
+	$1
+)`
 
+const getVendorByIDSQL = `-- name: getVendorByID: one
+SELECT
+	id,
+	name
+FROM vendors WHERE id = $1`
+
+const getVendorByNameSQL = `-- name: getVendorByName: one
+SELECT
+	id,
+	name
+FROM vendors
+WHERE name = $1`
+
+const getVendorsSQL = `-- name: getVendors: many
+SELECT
+	id,
+	name
+FROM vendors`
+
+const updateVendorSQL = `-- name: updateVendor: one
+UPDATE vendors
+set
+	name = $1
+WHERE id = $2`
+
+const deleteVendorSQL = `-- name: deleteVendor: one
+DELETE FROM vendors
+WHERE id = $1`
+
+// PGVendor holds the DB connection pool.
 type PGVendor struct {
 	DBPool *pgxpool.Pool
 }
 
+// New adds a vendor to the table.
 func (pg *PGVendor) New(name string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -32,6 +61,7 @@ func (pg *PGVendor) New(name string) error {
 	return nil
 }
 
+// GetByID returns a specific vendor matching the provided PK.
 func (pg *PGVendor) GetByID(id int) (models.Vendor, error) {
 	var vendor models.Vendor
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -42,6 +72,7 @@ func (pg *PGVendor) GetByID(id int) (models.Vendor, error) {
 	return vendor, nil
 }
 
+// GetByName returns a specific vendor matching the provided name.
 func (pg *PGVendor) GetByName(name string) (models.Vendor, error) {
 	var vendor models.Vendor
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -52,6 +83,7 @@ func (pg *PGVendor) GetByName(name string) (models.Vendor, error) {
 	return vendor, nil
 }
 
+// GetAll returns all vendors in the table.
 func (pg *PGVendor) GetAll() ([]models.Vendor, error) {
 	var vendors []models.Vendor
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -74,6 +106,7 @@ func (pg *PGVendor) GetAll() ([]models.Vendor, error) {
 	return vendors, nil
 }
 
+// Update modifies an existing vendor.
 func (pg *PGVendor) Update(vendor models.Vendor) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -84,6 +117,7 @@ func (pg *PGVendor) Update(vendor models.Vendor) error {
 	return nil
 }
 
+// Delete removes a vendor by it's PK.
 func (pg *PGVendor) Delete(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
