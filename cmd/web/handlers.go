@@ -10,14 +10,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+// handleHome displays the home page.
 func (app *application) handleHome(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "home.page.tmpl", nil)
 }
 
+// handleVendorsNew presents a form to add a vendor.
 func (app *application) handleVendorsNew(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "vendors_new.page.tmpl", nil)
 }
 
+// handleVendorsAdd submits the form to add a vendor.
 func (app *application) handleVendorsAdd(w http.ResponseWriter, r *http.Request) {
 	log.Println("hit vendor add handler")
 	if r.Method != http.MethodPost {
@@ -40,6 +43,7 @@ func (app *application) handleVendorsAdd(w http.ResponseWriter, r *http.Request)
 	app.render(w, "vendors.page.tmpl", vendors)
 }
 
+// handleVendorUpdate updates a vendor via form submission.
 func (app *application) handleVendorUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println("hit vendor update handler")
 	if err := r.ParseForm(); err != nil {
@@ -69,6 +73,7 @@ func (app *application) handleVendorUpdate(w http.ResponseWriter, r *http.Reques
 	app.render(w, "vendors.page.tmpl", vendors)
 }
 
+// handleModelsNew presents a form to add a model.
 func (app *application) handleModelsNew(w http.ResponseWriter, r *http.Request) {
 	vendors, err := app.inventoryService.VendorRepo.GetAll()
 	if err != nil {
@@ -78,6 +83,7 @@ func (app *application) handleModelsNew(w http.ResponseWriter, r *http.Request) 
 	app.render(w, "models_new.page.tmpl", vendors)
 }
 
+// handleModelsAdd submits the form to add a model.
 func (app *application) handleModelsAdd(w http.ResponseWriter, r *http.Request) {
 	log.Println("hit model add handler")
 	if r.Method != http.MethodPost {
@@ -110,6 +116,7 @@ func (app *application) handleModelsAdd(w http.ResponseWriter, r *http.Request) 
 	app.render(w, "models.page.tmpl", models)
 }
 
+// handleDeviceNew presents a form to add a device.
 func (app *application) handleDeviceNew(w http.ResponseWriter, r *http.Request) {
 	models, err := app.inventoryService.ModelRepo.GetAll()
 	if err != nil {
@@ -119,6 +126,7 @@ func (app *application) handleDeviceNew(w http.ResponseWriter, r *http.Request) 
 	app.render(w, "devices_new.page.tmpl", models)
 }
 
+// handleDeviceAdd submits the form to add a device.
 func (app *application) handleDeviceAdd(w http.ResponseWriter, r *http.Request) {
 	log.Println("hit device add handler")
 	if r.Method != http.MethodPost {
@@ -152,6 +160,7 @@ func (app *application) handleDeviceAdd(w http.ResponseWriter, r *http.Request) 
 	app.render(w, "devices.page.tmpl", devices)
 }
 
+// handleVendor displays a vendor's details.
 func (app *application) handleVendor(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -168,6 +177,7 @@ func (app *application) handleVendor(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "vendors_update.page.tmpl", vendor)
 }
 
+// handleVendors displays all vendors.
 func (app *application) handleVendors(w http.ResponseWriter, r *http.Request) {
 	vendors, err := app.inventoryService.VendorRepo.GetAll()
 	if err != nil {
@@ -177,6 +187,7 @@ func (app *application) handleVendors(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "vendors.page.tmpl", vendors)
 }
 
+// handleModels displays all models.
 func (app *application) handleModels(w http.ResponseWriter, r *http.Request) {
 	models, err := app.inventoryService.ModelRepo.GetAll()
 	if err != nil {
@@ -186,6 +197,7 @@ func (app *application) handleModels(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "models.page.tmpl", models)
 }
 
+// handleModels displays all devices.
 func (app *application) handleDevices(w http.ResponseWriter, r *http.Request) {
 	devices, err := app.inventoryService.DeviceRepo.GetAll()
 	if err != nil {
@@ -195,6 +207,7 @@ func (app *application) handleDevices(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "devices.page.tmpl", devices)
 }
 
+// handleVendor displays a vendor's details.
 func (app *application) handleModel(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
@@ -223,6 +236,7 @@ func (app *application) handleModel(w http.ResponseWriter, r *http.Request) {
 	app.render(w, "models_update.page.tmpl", composite)
 }
 
+// handleModelUpdate updates a model via form submission.
 func (app *application) handleModelUpdate(w http.ResponseWriter, r *http.Request) {
 	log.Println("hit vendor update handler")
 	if err := r.ParseForm(); err != nil {

@@ -11,6 +11,8 @@ import (
 
 var functions = template.FuncMap{}
 
+// newTemplateCache takes in a direcotry and returns a map with named
+// templates to ensure efficiency around accessing template data for rendering.
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 	pages, err := content.ReadDir(dir)
@@ -32,6 +34,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	return cache, nil
 }
 
+// render takes a template a data and builds the page presented to users.
 func (app *application) render(w http.ResponseWriter, name string, data interface{}) {
 	ts, ok := app.templateCache[name]
 	if !ok {

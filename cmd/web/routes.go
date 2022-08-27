@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// routes maps web routes to handlers.
 func (app *application) routes() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/", app.handleHome).Methods(http.MethodGet)
