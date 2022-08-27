@@ -6,6 +6,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+// Service provides the fields to interact with the inventory
+// persistance layer.
 type Service struct {
 	DBPool     *pgxpool.Pool
 	VendorRepo repository.Vendor
@@ -13,6 +15,7 @@ type Service struct {
 	DeviceRepo repository.Device
 }
 
+// NewService spings up an inventory service.
 func NewService(dbpool *pgxpool.Pool) *Service {
 	return &Service{
 		DBPool:     dbpool,
