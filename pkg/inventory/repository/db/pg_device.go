@@ -10,57 +10,76 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	newDeviceSQL  = `INSERT INTO devices (hostname, ipv4, model_id) VALUES ($1, $2, $3)`
-	getDeviceByID = `
-	SELECT
-		devices.id,
-		hostname,
-		ipv4,
-		vendors.name AS vendor,
-		models.name AS model
-	FROM devices
-	JOIN models
-		ON devices.model_id = models.id
-	JOIN vendors
-		ON models.vendor_id = vendors.id
-	WHERE devices.id = $1`
-	getDeviceByHostname = `
-	SELECT
-		devices.id,
-		hostname,
-		ipv4,
-		vendors.name AS vendor,
-		models.name AS model
-	FROM devices
-	JOIN models
-		ON devices.model_id = models.id
-	JOIN vendors
-		ON models.vendor_id = vendors.id
-	WHERE hostname = $1`
-	getAllSQL = `
-	SELECT
-		devices.id,
-		hostname,
-		ipv4,
-		vendors.name AS vendor,
-		models.name AS model
-	FROM devices
-	JOIN models
-		ON devices.model_id = models.id
-	JOIN vendors
-		ON models.vendor_id = vendors.id`
-	updateDeviceSQL = `
-	UPDATE devices
-	SET hostname = $1, ipv4 = $2, model_id = $3
-	WHERE id = $4`
-	deleteDeviceSQL = `DELETE FROM devices WHERE id = $1`
-)
+const newDeviceSQL = `-- name: newDevice: one
+INSERT INTO devices (
+	hostname,
+	ipv4,
+	model_id
+) VALUES (
+	$1,
+	$2,
+	$3
+)`
 
+const getDeviceByID = `-- name: getDeviceByID: one
+SELECT
+	devices.id,
+	hostname,
+	ipv4,
+	vendors.name AS vendor,
+	models.name AS model
+FROM devices
+JOIN models
+	ON devices.model_id = models.id
+JOIN vendors
+	ON models.vendor_id = vendors.id
+WHERE devices.id = $1`
+
+const getDeviceByHostname = `-- name: getDeviceByHostname: one
+SELECT
+	devices.id,
+	hostname,
+	ipv4,
+	vendors.name AS vendor,
+	models.name AS model
+FROM devices
+JOIN models
+	ON devices.model_id = models.id
+JOIN vendors
+	ON models.vendor_id = vendors.id
+WHERE hostname = $1`
+
+const getAllSQL = `-- name: getAll: many
+SELECT
+	devices.id,
+	hostname,
+	ipv4,
+	vendors.name AS vendor,
+	models.name AS model
+FROM devices
+JOIN models
+	ON devices.model_id = models.id
+JOIN vendors
+	ON models.vendor_id = vendors.id`
+
+const updateDeviceSQL = `-- name: updateDevice: one
+UPDATE devices
+SET
+	hostname = $1,
+	ipv4 = $2,
+	model_id = $3
+WHERE id = $4`
+
+const deleteDeviceSQL = `-- name: deleteDevice: one
+DELETE FROM devices
+WHERE id = $1`
+
+// PGDevice holds the DB connection pool.
 type PGDevice struct {
 	DBPool *pgxpool.Pool
 }
 
+// New adds a device to the table.
 func (pg *PGDevice) New(device models.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -71,6 +90,7 @@ func (pg *PGDevice) New(device models.Device) error {
 	return nil
 }
 
+// GetByID returns a specific device matching the provided PK.
 func (pg *PGDevice) GetByID(id int) (models.Device, error) {
 	var device models.Device
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -89,6 +109,7 @@ func (pg *PGDevice) GetByID(id int) (models.Device, error) {
 	return device, nil
 }
 
+// GetByHostname returns a specific device matching the provided hostname.
 func (pg *PGDevice) GetByHostname(name string) (models.Device, error) {
 	var device models.Device
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -107,6 +128,7 @@ func (pg *PGDevice) GetByHostname(name string) (models.Device, error) {
 	return device, nil
 }
 
+// GetAll returns all devices in the table.
 func (pg *PGDevice) GetAll() ([]models.Device, error) {
 	var devices []models.Device
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -137,6 +159,7 @@ func (pg *PGDevice) GetAll() ([]models.Device, error) {
 	return devices, nil
 }
 
+// Update modifies an existing device.
 func (pg *PGDevice) Update(device models.Device) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
@@ -147,6 +170,7 @@ func (pg *PGDevice) Update(device models.Device) error {
 	return nil
 }
 
+// Delete removes a device by it's PK.
 func (pg *PGDevice) Delete(id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
