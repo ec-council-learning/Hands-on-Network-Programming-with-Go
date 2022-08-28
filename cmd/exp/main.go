@@ -1,31 +1,16 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"os"
-	"time"
 
-	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/inventory"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/codered-by-ec-council/Hands-on-Network-Programming-with-Go/pkg/cmdrunner"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	defer cancel()
-	dbpool, err := pgxpool.Connect(ctx, os.Getenv("DSN"))
-	if err != nil {
+	isisAdj := &cmdrunner.ISISAdjacencyRpcReply{Target: "labsrx", ExpectedNeighbor: "lab_srx100"}
+	sr := &cmdrunner.SpecificRouteRpcReply{Target: "labsrx", ExpectedNextHop: "192.168.0.1"}
+	cmds := []cmdrunner.Runner{isisAdj, sr}
+	if err := cmdrunner.Stepper(cmds); err != nil {
 		log.Println(err)
 	}
-	defer dbpool.Close()
-	if err := dbpool.Ping(ctx); err != nil {
-		log.Println("db conn failed:", err)
-	}
-	fmt.Println("db connected successfully")
-	inventoryService := inventory.NewService(dbpool)
-	if err := inventoryService.DeviceRepo.Delete(2); err != nil {
-		log.Println(err)
-	}
-	fmt.Println("successfully removed test host")
 }

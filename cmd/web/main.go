@@ -45,5 +45,7 @@ func main() {
 		inventoryService: inventory.NewService(dbpool),
 	}
 	log.Println("starting web server on", *websocket)
-	http.ListenAndServe(*websocket, app.routes())
+	if err := http.ListenAndServe(*websocket, app.routes()); err != nil {
+		log.Println(err)
+	}
 }

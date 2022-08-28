@@ -13,11 +13,11 @@ type Runner interface {
 // the received data while validating success.
 func Stepper(cmds []Runner) error {
 	for _, cmd := range cmds {
-		fmt.Printf("[%v] running\n", cmd)
+		fmt.Printf("[%v] running...\n", cmd)
 		if err := cmd.Run(); err != nil {
 			return err
 		}
-		fmt.Printf("[%v] validating\n", cmd)
+		fmt.Printf("[%v] validating...\n", cmd)
 		if err := cmd.Compare(); err != nil {
 			return err
 		}
