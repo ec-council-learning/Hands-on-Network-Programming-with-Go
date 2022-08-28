@@ -5,3 +5,6 @@ Hands-on Network Programming with Go, by EC-Council
 export POSTGRES_USER=postgres
 export POSTGRES_PASSWORD=postgres
 export DSN=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/device_inventory
+
+## Fire up the web server.
+go run cmd/web/*.go

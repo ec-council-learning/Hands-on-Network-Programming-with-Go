@@ -26,6 +26,7 @@
             <input type="text" name="model" class="form-control" id="model" value="{{.Model.Name}}">
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
+        <a class="btn btn-danger btn-block" href="/models/delete/{{.Model.ID}}">Delete</a>
     </form>
 </div>
 {{end}}
