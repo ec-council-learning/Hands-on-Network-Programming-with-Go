@@ -99,6 +99,29 @@ func SetKey(keyfile string) option {
 	})
 }
 
+// SetKeyExchange updates the list of key exchange algorithms.
+// Common examples include:
+// 		- diffie-hellman-group1-sha1
+// 		- diffie-hellman-group14-sha256
+// 		- curve25519-sha256
+func SetKeyExchange(key string) option {
+	return properOption(func(c *sshClient) {
+		c.cfg.KeyExchanges = append(c.cfg.KeyExchanges, key)
+	})
+}
+
+// SetCipher updates the list of cipher algorithms.
+// Common examples include:
+// 		- aes128-ctr
+// 		- aes192-ctr
+// 		- aes256-ctr
+// 		- 3des-cbc
+func SetCipher(cipher string) option {
+	return properOption(func(c *sshClient) {
+		c.cfg.Ciphers = append(c.cfg.Ciphers, cipher)
+	})
+}
+
 // setup runs through any supplied options checking for
 // any errors, returning nil if there are none.
 func (c *sshClient) setup(opts ...option) error {
